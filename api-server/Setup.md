@@ -46,6 +46,26 @@ uvicorn app:app --reload --host 127.0.0.1 --port 8000
 
 ---
 
+
+# 📦 Libraries and Technologies Used
+
+## Frontend (React + Vite + TypeScript)
+- **React** — JavaScript library for building user interfaces.
+- **Vite** — Frontend build tool for rapid development and hot reloading.
+- **TypeScript** — Strong typing for React components and state management.
+- **CSS Modules** — Component-scoped styles (`App.css`).
+
+## Backend (FastAPI + Python)
+- **FastAPI** — High-performance Python web framework for APIs.
+- **Uvicorn** — ASGI server for running FastAPI applications.
+- **SQLAlchemy** — ORM (Object Relational Mapper) for interacting with SQLite database easily.
+- **Pydantic** — Data validation and parsing using Python type hints.
+
+## Database
+- **SQLite3** — Lightweight file-based database, easy to set up locally without separate server installation.
+
+---
+
 # 📋 Quick Summary
 
 | Component | Command | URL |
@@ -53,3 +73,7 @@ uvicorn app:app --reload --host 127.0.0.1 --port 8000
 | Frontend | `npm start` | [http://localhost:3000](http://localhost:3000) |
 | Backend | `uvicorn app:app --reload` | [http://127.0.0.1:8000](http://127.0.0.1:8000) |
 | API Docs | (auto) | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) |
+
+---
+
+# 🙏 Thank You
