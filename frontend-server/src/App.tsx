@@ -33,28 +33,29 @@ function App() {
   // Submit a new message to the backend
   const submitMessage = async () => {
     if (message.trim() === '') {
-      setError(true); // Show error if input is empty
+      setError(true);
       return;
     }
     setError(false);
-
-    // Send POST request to create a new message
+  
     await fetch('http://127.0.0.1:8000/messages/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ content: message }),
+      body: JSON.stringify({
+        content: message    // ✅ Only content
+      }),
     });
-
-    // Refresh message list after submission
+  
     const response = await fetch('http://127.0.0.1:8000/messages/');
     const data = await response.json();
     setMessages(data);
-
-    // Clear the input box after submission
+  
     setMessage('');
   };
+  
+  
 
   // Delete a message by its ID
   const deleteMessage = async (id: number) => {
@@ -67,7 +68,22 @@ function App() {
     const data = await response.json();
     setMessages(data);
   };
-
+  // Save the new order of messages to the backend
+  const saveOrder = async (newOrder: Message[]) => {
+    const payload = newOrder.map((msg, index) => ({
+      id: msg.id,
+      order: index
+    }));
+  
+    await fetch('http://127.0.0.1:8000/messages/reorder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+  };
+  
   // Move a message up in the list visually
   const moveMessageUp = (id: number) => {
     const idx = messages.findIndex(m => m.id === id);
@@ -75,8 +91,10 @@ function App() {
       const newMessages = [...messages];
       [newMessages[idx - 1], newMessages[idx]] = [newMessages[idx], newMessages[idx - 1]];
       setMessages(newMessages);
+      saveOrder(newMessages);  // 🆕 Save the new order to backend
     }
   };
+  
 
   // Move a message down in the list visually
   const moveMessageDown = (id: number) => {
@@ -85,8 +103,10 @@ function App() {
       const newMessages = [...messages];
       [newMessages[idx], newMessages[idx + 1]] = [newMessages[idx + 1], newMessages[idx]];
       setMessages(newMessages);
+      saveOrder(newMessages);  // 🆕 Save the new order to backend
     }
   };
+  
 
   // Update an existing message on the backend
   const updateMessage = async (id: number) => {
@@ -161,6 +181,7 @@ function App() {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => {
+            // allow for submission with Enter key, but only if not empty
             if (e.key === 'Enter') {
               if (message.trim().length >= 1) {
                 submitMessage();

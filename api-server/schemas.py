@@ -21,6 +21,13 @@ from pydantic import BaseModel
 
 # ================================================================
 
+
+
 # Schema representing the structure of a message for creation and update operations
 class MessageCreate(BaseModel):
     content: str
+
+# 🆕 Schema for updating message order (used for reordering multiple messages)
+class MessageOrderUpdate(BaseModel):
+    id: int
+    order: int

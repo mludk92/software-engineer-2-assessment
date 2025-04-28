@@ -1,17 +1,22 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import func
+from typing import List  # 🆕 Needed for type hints
 from database import SessionLocal, init_db
 from models import Message
-from schemas import MessageCreate  
+from schemas import MessageCreate, MessageOrderUpdate
 
-# Create an API router for all /messages/ endpoints
+# ================================================================
+# This router handles all /messages/ API endpoints
+# ================================================================
+
 router = APIRouter(prefix="/messages", tags=["Messages"])
 
 # Dependency to get a database session
 def get_db():
     """
-    Provides a new SQLAlchemy database session for each request.
-    Closes the session after request is completed.
+    Provides a SQLAlchemy session for each request.
+    Ensures session is closed after use.
     """
     db = SessionLocal()
     try:
@@ -22,44 +27,45 @@ def get_db():
 # Initialize the database (create tables if they don't exist)
 init_db()
 
+# ================================================================
+# Routes
+# ================================================================
+
 @router.get("/")
 def get_messages(db: Session = Depends(get_db)):
     """
-    Retrieve a list of all messages from the database.
+    Fetch all messages ordered by their 'order' value.
     """
-    return db.query(Message).all()
+    return db.query(Message).order_by(Message.order).all()
 
 @router.post("/")
 def create_message(message: MessageCreate, db: Session = Depends(get_db)):
     """
-    Create a new message in the database.
-
-    Args:
-        message: The message content provided by the client.
-    
-    Returns:
-        The newly created message object.
+    Create a new message with automatically assigned order.
     """
-    new_message = Message(content=message.content)
+    max_order = db.query(func.max(Message.order)).scalar() or 0
+    new_message = Message(content=message.content, order=max_order + 1)
     db.add(new_message)
     db.commit()
     db.refresh(new_message)
     return new_message
 
+@router.post("/reorder")
+def reorder_messages(order_updates: List[MessageOrderUpdate], db: Session = Depends(get_db)):
+    """
+    Reorder multiple messages by updating their 'order' fields.
+    """
+    for update in order_updates:
+        message = db.query(Message).filter(Message.id == update.id).first()
+        if message:
+            message.order = update.order
+    db.commit()
+    return {"detail": "Order updated successfully"}
+
 @router.put("/{message_id}")
 def update_message(message_id: int, message: MessageCreate, db: Session = Depends(get_db)):
     """
     Update the content of an existing message.
-
-    Args:
-        message_id: The ID of the message to update.
-        message: The new content for the message.
-    
-    Raises:
-        HTTPException: If the message with the given ID is not found.
-    
-    Returns:
-        The updated message object.
     """
     existing_message = db.query(Message).filter(Message.id == message_id).first()
     if not existing_message:
@@ -72,16 +78,7 @@ def update_message(message_id: int, message: MessageCreate, db: Session = Depend
 @router.delete("/{message_id}")
 def delete_message(message_id: int, db: Session = Depends(get_db)):
     """
-    Delete an existing message from the database.
-
-    Args:
-        message_id: The ID of the message to delete.
-    
-    Raises:
-        HTTPException: If the message with the given ID is not found.
-    
-    Returns:
-        A confirmation message indicating successful deletion.
+    Delete a message by ID.
     """
     message = db.query(Message).filter(Message.id == message_id).first()
     if not message:

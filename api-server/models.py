@@ -24,10 +24,9 @@ Base = declarative_base()
 
 # Define the Message model, representing a message record in the database
 class Message(Base):
-    __tablename__ = "messages"  # Name of the table in SQLite database
+    __tablename__ = "messages"
 
-    # Primary key ID (unique identifier for each message)
     id = Column(Integer, primary_key=True, index=True)
-
-    # Message content (text of the message)
     content = Column(String, nullable=False)
+    order = Column(Integer, nullable=False)  # NEW: Order position
+

@@ -53,3 +53,4 @@ uvicorn app:app --reload --host 127.0.0.1 --port 8000
 | Frontend | `npm start` | [http://localhost:3000](http://localhost:3000) |
 | Backend | `uvicorn app:app --reload` | [http://127.0.0.1:8000](http://127.0.0.1:8000) |
 | API Docs | (auto) | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) |
+
