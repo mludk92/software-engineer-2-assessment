@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.messages import router as messages_router
+from logger import get_logs
 
 # Initialize FastAPI application
 app = FastAPI()
@@ -21,3 +22,7 @@ app.include_router(messages_router)
 @app.get("/")
 def root():
     return {"message": "Welcome to the API server!"}
+    
+@app.get("/logs")  # ✅ Serve logs at this endpoint
+def show_logs():
+    return get_logs()

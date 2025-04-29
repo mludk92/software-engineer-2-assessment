@@ -5,6 +5,7 @@ from typing import List  # 🆕 Needed for type hints
 from database import SessionLocal, init_db
 from models import Message
 from schemas import MessageCreate, MessageOrderUpdate
+from logger import add_log
 
 # ================================================================
 # This router handles all /messages/ API endpoints
@@ -48,6 +49,7 @@ def create_message(message: MessageCreate, db: Session = Depends(get_db)):
     db.add(new_message)
     db.commit()
     db.refresh(new_message)
+    add_log(f"Message created: {new_message.content} with order {new_message.order}")
     return new_message
 
 @router.post("/reorder")
@@ -84,5 +86,6 @@ def delete_message(message_id: int, db: Session = Depends(get_db)):
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
     db.delete(message)
+    add_log(f"Message deleted: {message.content} with order {message.order}")
     db.commit()
     return {"detail": "Message deleted"}
